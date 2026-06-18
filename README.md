@@ -1,29 +1,32 @@
-# CRM de práctica (Django + DRF)
+# CRM (Django + DRF)
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Django 6.0](https://img.shields.io/badge/django-6.0-green.svg)](https://www.djangoproject.com/)
 [![DRF 3.17](https://img.shields.io/badge/DRF-3.17-red.svg)](https://www.django-rest-framework.org/)
-[![Code style: PEP 8](https://img.shields.io/badge/code%20style-PEP%208-orange.svg)](https://peps.python.org/pep-0008/)
+[![Spec: spec-kit](https://img.shields.io/badge/spec-spec--kit-purple.svg)](https://github.com/github/spec-kit)
 [![status: in progress](https://img.shields.io/badge/status-in%20progress-yellow.svg)]()
 
-CRM mínimo hecho a mano como entrenamiento para una prueba técnica de
-Django + DRF. Cinco entidades, API REST, ORM optimizado, tests con
-`pytest`. **Todo el código se escribe a mano, sin IA.**
+A real, productive CRM for solo salespeople and small teams. Built
+by hand on Django + DRF. Single-owner auth, pipeline with stages,
+opportunities with assignment, activities log, audit log, advanced
+filtering, CSV export, dashboard with metrics, and a test suite
+that locks the contracts.
 
-> **¿Por qué AGPL-3.0?** Si alguien toma este código y lo hostea como
-> servicio (SaaS), tiene que abrir el código de su servicio. Es la
-> licencia que mejor protege el open source contra el cierre proprietário.
+> **¿Por qué AGPL-3.0?** Si alguien toma este código y lo hostea
+> como servicio (SaaS), tiene que abrir el código de su servicio.
+> Es la licencia que mejor protege el open source contra el cierre
+> proprietário.
 
 ---
 
 ## Tabla de contenidos
 
-- [Características](#características)
-- [Stack](#stack)
 - [Quickstart](#quickstart)
-- [Documentación](#documentación)
-- [Roadmap de aprendizaje](#roadmap-de-aprendizaje)
+- [Documentación del proyecto](#documentación-del-proyecto)
+- [Stack](#stack)
+- [Status](#status)
+- [Estructura](#estructura)
 - [Contribuir](#contribuir)
 - [Seguridad](#seguridad)
 - [Licencia](#licencia)
@@ -31,17 +34,42 @@ Django + DRF. Cinco entidades, API REST, ORM optimizado, tests con
 
 ---
 
-## Características
+## Quickstart
 
-- 5 modelos: `Cliente`, `Contacto`, `Oportunidad`, `Actividad`, `Etiqueta`.
-- Admin de Django con todos los modelos registrados.
-- API REST con DRF (serializers con validación, viewsets, router, paginación, filtros).
-- Seed con Faker: 50 clientes con relaciones realistas.
-- ORM optimizado: `select_related` + `prefetch_related` con test `assertNumQueries` que bloquea la regresión de N+1.
-- Manager custom (`Cliente.activos`, `Cliente.con_oportunidades_ganadas`).
-- Signal idempotente que crea una `Actividad` al cerrar un deal.
-- Tests con `pytest` + `pytest-django`.
-- Documentación manejada con **OpenSpec/SDD** dentro de `openspec/`.
+```bash
+git clone https://github.com/CristianMz21/crm.git
+cd crm
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+Detalle en [`specs/001-crm-mvp/quickstart.md`](./specs/001-crm-mvp/quickstart.md).
+
+---
+
+## Documentación del proyecto
+
+Este proyecto usa **Spec-Driven Development** con
+[github/spec-kit](https://github.com/github/spec-kit). **No hay
+carpeta `docs/` a propósito** — los artefactos spec-kit son la
+única fuente de verdad.
+
+| Artefacto | Para qué |
+|---|---|
+| [`.specify/memory/constitution.md`](./.specify/memory/constitution.md) | Principios rectores del proyecto. |
+| [`specs/001-crm-mvp/spec.md`](./specs/001-crm-mvp/spec.md) | Spec del MVP: user stories, FRs, success criteria. |
+| [`specs/001-crm-mvp/plan.md`](./specs/001-crm-mvp/plan.md) | Stack, arquitectura, estructura. |
+| [`specs/001-crm-mvp/data-model.md`](./specs/001-crm-mvp/data-model.md) | Entidades, campos, decisiones. |
+| [`specs/001-crm-mvp/research.md`](./specs/001-crm-mvp/research.md) | Por qué estas elecciones, qué se descartó. |
+| [`specs/001-crm-mvp/quickstart.md`](./specs/001-crm-mvp/quickstart.md) | Cómo correr el sistema. |
+| [`specs/001-crm-mvp/tasks.md`](./specs/001-crm-mvp/tasks.md) | Tareas por user story. |
+| [`specs/001-crm-mvp/contracts/api.yaml`](./specs/001-crm-mvp/contracts/api.yaml) | OpenAPI 3 del contrato HTTP. |
+
+**Regla de oro:** si cambia el comportamiento, cambia el spec. Spec
+desactualizado = bug latente.
 
 ---
 
@@ -49,7 +77,7 @@ Django + DRF. Cinco entidades, API REST, ORM optimizado, tests con
 
 | Componente | Versión | Para qué |
 |---|---|---|
-| Python | 3.13+ | Runtime |
+| Python | 3.11+ | Runtime |
 | Django | 6.0 | Framework web |
 | Django REST Framework | 3.17 | API REST |
 | django-filter | 24+ | Filtros declarativos |
@@ -58,109 +86,95 @@ Django + DRF. Cinco entidades, API REST, ORM optimizado, tests con
 | pytest-django | 4.8+ | Integración pytest + Django |
 | Faker | 25+ | Datos de seed |
 | SQLite | 3 | Default DB |
+| Spec Kit | latest | Spec-driven development |
 
 ---
 
-## Quickstart
+## Status
 
-```bash
-# 1. Clonar
-git clone https://github.com/CristianMz21/crm.git
-cd crm
+El proyecto está en construcción. Día 1 del modelo Cliente + Contacto
+ya está hecho. El resto sigue el plan en
+[`specs/001-crm-mvp/tasks.md`](./specs/001-crm-mvp/tasks.md).
 
-# 2. Entorno virtual
-python -m venv .venv
-source .venv/bin/activate
+**MVP (P1)**: Auth + Clientes + Oportunidades en pipeline.
+**P2**: Activities + Audit log + CSV export.
+**P3**: Saved searches + refinamientos de dashboard.
 
-# 3. Instalar dependencias
-pip install -r requirements.txt
+| Capa | Spec | Status |
+|---|---|---|
+| Auth (US1) | [spec.md#user-story-1](./specs/001-crm-mvp/spec.md#user-story-1---authenticate-and-reach-my-dashboard-priority-p1) | ⬜ |
+| Clientes + Contactos (US2) | [spec.md#user-story-2](./specs/001-crm-mvp/spec.md#user-story-2---manage-clients-and-contacts-priority-p1) | ⬜ |
+| Pipeline + Oportunidades (US3) | [spec.md#user-story-3](./specs/001-crm-mvp/spec.md#user-story-3---move-opportunities-through-a-pipeline-priority-p1) | ⬜ |
+| Activities (US4) | [spec.md#user-story-4](./specs/001-crm-mvp/spec.md#user-story-4---log-activities-against-clients-and-opportunities-priority-p2) | ⬜ |
+| Audit log (US5) | [spec.md#user-story-5](./specs/001-crm-mvp/spec.md#user-story-5---audit-log-on-every-change-priority-p2) | ⬜ |
+| CSV export (US6) | [spec.md#user-story-6](./specs/001-crm-mvp/spec.md#user-story-6---export-any-list-to-csv-priority-p2) | ⬜ |
+| Saved searches (US7) | [spec.md#user-story-7](./specs/001-crm-mvp/spec.md#user-story-7---advanced-filtering-and-saved-searches-priority-p3) | ⬜ |
+| Dashboard (US8) | [spec.md#user-story-8](./specs/001-crm-mvp/spec.md#user-story-8---dashboard-with-basic-metrics-priority-p3) | ⬜ |
 
-# 4. Migrar
-python manage.py migrate
+---
 
-# 5. Cargar datos de prueba
-python seed.py
+## Estructura
 
-# 6. Crear superusuario
-python manage.py createsuperuser
-
-# 7. Correr
-python manage.py runserver
 ```
-
-- Admin: <http://127.0.0.1:8000/admin/>
-- API: <http://127.0.0.1:8000/api/>
-- Tests: `pytest`
-
----
-
-## Documentación
-
-Toda la documentación del proyecto está manejada con **OpenSpec/SDD**
-dentro de `openspec/`. **No hay carpeta `docs/` a propósito** — los
-artefactos SDD son la única fuente de verdad.
-
-| Artefacto | Para qué |
-|---|---|
-| [`openspec/config.yaml`](./openspec/config.yaml) | Reglas del proyecto, comandos de test/check. |
-| [`openspec/specs/crm/spec.md`](./openspec/specs/crm/spec.md) | Spec principal (source of truth). |
-| [`openspec/changes/crm-mvp/proposal.md`](./openspec/changes/crm-mvp/proposal.md) | Por qué y qué se construye. |
-| [`openspec/changes/crm-mvp/specs/crm/spec.md`](./openspec/changes/crm-mvp/specs/crm/spec.md) | Delta spec con escenarios Given/When/Then. |
-| [`openspec/changes/crm-mvp/design.md`](./openspec/changes/crm-mvp/design.md) | Arquitectura, decisiones, ORM patterns, pitfalls. |
-| [`openspec/changes/crm-mvp/tasks.md`](./openspec/changes/crm-mvp/tasks.md) | Tareas por día (checkboxes). |
-| [`openspec/changes/crm-mvp/state.yaml`](./openspec/changes/crm-mvp/state.yaml) | Estado del change (sobrevive compactaciones). |
-
-**Regla de oro:** si cambia el comportamiento, cambia el spec. Spec
-desactualizado = bug latente.
-
----
-
-## Roadmap de aprendizaje
-
-7 días, 1 capa por día. El detalle con checkboxes está en
-[`openspec/changes/crm-mvp/tasks.md`](./openspec/changes/crm-mvp/tasks.md).
-
-| Día | Capa | Spec coverage | Estado |
-|---|---|---|---|
-| 1 | Modelos `Cliente` + `Contacto` + admin | R-MODELS-01, R-MODELS-02 | ✅ |
-| 2 | Vistas vanilla + templates | R-VIEWS-01..03 | ⬜ |
-| 3 | `Oportunidad` + `Actividad` + `Etiqueta` + seed | R-MODELS-03..05, R-SEED-01 | ⬜ |
-| 4 | API DRF (serializers, viewsets, validaciones) | R-API-01..04 | ⬜ |
-| 5 | ORM intensivo + N+1 fix | R-ORM-01..03 | ⬜ |
-| 6 | Tests + manager custom + signal | R-TEST-01..04, R-MGR-01..02, R-SIG-01 | ⬜ |
-| 7 | Simulación a 90 minutos | — | ⬜ |
+crm/
+├── config/                  # proyecto Django (settings, urls, wsgi)
+├── clientes/                # Clientes, Contactos, Oportunidades, Activities, Etiquetas
+├── pipeline/                # Pipeline + Etapas
+├── audit/                   # Audit log
+├── dashboard/               # Endpoint de dashboard
+├── templates/               # Templates HTML mínimos
+├── .specify/                # Configuración de spec-kit
+│   └── memory/
+│       └── constitution.md  # Principios rectores
+├── specs/                   # Specs por feature
+│   └── 001-crm-mvp/
+│       ├── spec.md
+│       ├── plan.md
+│       ├── data-model.md
+│       ├── research.md
+│       ├── quickstart.md
+│       ├── tasks.md
+│       └── contracts/
+│           └── api.yaml
+├── seed.py                  # Seeder con Faker
+├── manage.py
+├── requirements.txt
+└── pyproject.toml
+```
 
 ---
 
 ## Contribuir
 
-Este proyecto acepta contribuciones. Por favor:
+Por favor leé [`CONTRIBUTING.md`](./CONTRIBUTING.md) y
+[`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
+antes de abrir un PR.
 
-1. Leé [`CONTRIBUTING.md`](./CONTRIBUTING.md) antes de abrir un PR.
-2. Pequeños cambios van con PR directo. Cambios grandes abren issue primero.
-3. Todos los PRs deben pasar `pytest` antes de review.
-4. El código se escribe a mano — **no se acepta código generado por IA**.
-5. Spec antes que código. Si tu cambio cambia comportamiento, actualizá
-   el spec en `openspec/`.
+Resumen:
 
-Por el código de conducta, mirá [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md).
+- Spec primero. El comportamiento vive en
+  [`specs/001-crm-mvp/spec.md`](./specs/001-crm-mvp/spec.md).
+- Código a mano. **No se acepta código generado por IA.**
+- `pytest` verde antes de pedir review.
+- Conventional Commits para los mensajes.
+- Sin `Co-Authored-By` de IA.
 
 ---
 
 ## Seguridad
 
-Para reportar una vulnerabilidad, **NO abras un issue público**. Mandá un
-mail o usá el canal de seguridad privada detallado en
-[`SECURITY.md`](./SECURITY.md). Las vulnerabilidades confirmadas se
-parchean dentro de las 48 horas.
+Para reportar una vulnerabilidad, **NO abras un issue público**.
+Mandá un mail o usá la opción de **Report a vulnerability** en la
+pestaña "Security" del repositorio. Detalle en
+[`SECURITY.md`](./SECURITY.md).
 
 ---
 
 ## Tests
 
 ```bash
-pytest                    # corre todo
-pytest -k cliente         # corre los que matcheen "cliente"
+pytest                    # toda la suite
+pytest -k cliente         # los que matcheen "cliente"
 pytest --lf               # solo los que fallaron la última vez
 pytest --cov=clientes     # con cobertura
 ```
@@ -173,28 +187,12 @@ pytest --cov=clientes     # con cobertura
 
 **AGPL-3.0** — ver [`LICENSE`](./LICENSE) para el texto completo.
 
-En resumen: podés usar, modificar y distribuir el código, pero si
-ponés una versión modificada en un servidor accesible por red, tenés
-que publicar el código fuente de esa versión modificada. Es la
-licencia que mejor protege el open source contra el uso proprietário
-sin reciprocidad.
-
 ---
 
 ## Autor
 
 **CristianMz21** — <https://github.com/CristianMz21>
 
-Construido como proyecto de práctica para una prueba técnica de
-Django + DRF. El código se escribe a mano siguiendo
-[OpenSpec/SDD](https://github.com/FissionAI/OpenSpec) para
-documentación que no mienta.
-
----
-
-## Agradecimientos
-
-- La comunidad de Django por la documentación oficial que es oro.
-- El proyecto [OpenSpec](https://github.com/FissionAI/OpenSpec) por la
-  metodología SDD.
-- La FSF por mantener la AGPL viva.
+Construido como proyecto real con
+[github/spec-kit](https://github.com/github/spec-kit) para
+documentación que no miente.

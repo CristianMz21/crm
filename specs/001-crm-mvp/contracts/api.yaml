@@ -1,0 +1,697 @@
+openapi: 3.0.3
+info:
+  title: CRM MVP API
+  version: 0.1.0
+  description: |
+    REST API for the CRM MVP. Single-owner, session-authenticated.
+    All endpoints require authentication unless noted.
+  contact:
+    name: CristianMz21
+    url: https://github.com/CristianMz21/crm
+  license:
+    name: AGPL-3.0
+    url: https://www.gnu.org/licenses/agpl-3.0
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local development
+
+security:
+  - sessionAuth: []
+
+tags:
+  - name: auth
+    description: Login, logout, current user
+  - name: clientes
+    description: Clients and their contacts
+  - name: oportunidades
+    description: Opportunities and pipeline movement
+  - name: actividades
+    description: Activity log
+  - name: etiquetas
+    description: Tags
+  - name: pipelines
+    description: Pipelines and stages
+  - name: audit
+    description: Audit log
+  - name: dashboard
+    description: Dashboard metrics
+  - name: busquedas
+    description: Saved searches
+
+paths:
+  /api/auth/me/:
+    get:
+      tags: [auth]
+      summary: Current user info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/auth/login/:
+    post:
+      tags: [auth]
+      summary: Session login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Authenticated
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/auth/logout/:
+    post:
+      tags: [auth]
+      summary: Session logout
+      responses:
+        "204":
+          description: Logged out
+
+  /api/clientes/:
+    get:
+      tags: [clientes]
+      summary: List clients
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/FormatParam"
+        - in: query
+          name: ciudad
+          schema: { type: string }
+        - in: query
+          name: activo
+          schema: { type: boolean }
+        - in: query
+          name: search
+          schema: { type: string, maxLength: 100 }
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClienteList"
+            text/csv:
+              schema:
+                type: string
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [clientes]
+      summary: Create a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClienteCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/clientes/{id}/:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [clientes]
+      summary: Retrieve a client with nested contacts
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClienteDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [clientes]
+      summary: Update a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClienteUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cliente"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [clientes]
+      summary: Archive a client (soft delete)
+      responses:
+        "204":
+          description: Archived
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/clientes/{id}/contactos/:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [clientes]
+      summary: List contacts of a client
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactoList"
+    post:
+      tags: [clientes]
+      summary: Create a contact under a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactoCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contacto"
+
+  /api/oportunidades/:
+    get:
+      tags: [oportunidades]
+      summary: List opportunities
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/FormatParam"
+        - in: query
+          name: etapa
+          schema: { type: integer }
+        - in: query
+          name: cliente
+          schema: { type: integer }
+        - in: query
+          name: asignado_a
+          schema: { type: integer }
+        - in: query
+          name: monto__gte
+          schema: { type: string, pattern: "^[0-9]+(\\.[0-9]{1,2})?$" }
+        - in: query
+          name: monto__lte
+          schema: { type: string, pattern: "^[0-9]+(\\.[0-9]{1,2})?$" }
+        - in: query
+          name: search
+          schema: { type: string, maxLength: 100 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OportunidadList"
+    post:
+      tags: [oportunidades]
+      summary: Create an opportunity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OportunidadCreate"
+      responses:
+        "201":
+          description: Created
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/oportunidades/{id}/mover_etapa/:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    post:
+      tags: [oportunidades]
+      summary: Move an opportunity to a new stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [etapa]
+              properties:
+                etapa:
+                  type: integer
+                  description: Target stage id
+      responses:
+        "200":
+          description: Moved
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/actividades/:
+    get:
+      tags: [actividades]
+      summary: List activities
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - in: query
+          name: cliente
+          schema: { type: integer }
+        - in: query
+          name: oportunidad
+          schema: { type: integer }
+        - in: query
+          name: tipo
+          schema:
+            type: string
+            enum: [llamada, email, reunion]
+      responses:
+        "200":
+          description: OK
+    post:
+      tags: [actividades]
+      summary: Log a new activity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActividadCreate"
+      responses:
+        "201":
+          description: Created
+
+  /api/etiquetas/:
+    get:
+      tags: [etiquetas]
+      summary: List tags
+      responses:
+        "200":
+          description: OK
+    post:
+      tags: [etiquetas]
+      summary: Create a tag
+      responses:
+        "201":
+          description: Created
+
+  /api/pipelines/:
+    get:
+      tags: [pipelines]
+      summary: List pipelines
+      responses:
+        "200":
+          description: OK
+
+  /api/pipelines/default/:
+    get:
+      tags: [pipelines]
+      summary: The default pipeline
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pipeline"
+
+  /api/audit/:
+    get:
+      tags: [audit]
+      summary: Audit log list
+      parameters:
+        - in: query
+          name: model
+          schema: { type: string }
+        - in: query
+          name: object_id
+          schema: { type: integer }
+        - in: query
+          name: action
+          schema:
+            type: string
+            enum: [create, update, delete]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogList"
+
+  /api/dashboard/:
+    get:
+      tags: [dashboard]
+      summary: Dashboard metrics
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+
+  /api/busquedas_guardadas/:
+    get:
+      tags: [busquedas]
+      summary: List saved searches
+      responses:
+        "200":
+          description: OK
+    post:
+      tags: [busquedas]
+      summary: Save a search
+      responses:
+        "201":
+          description: Created
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+
+  parameters:
+    PageParam:
+      in: query
+      name: page
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSizeParam:
+      in: query
+      name: page_size
+      schema: { type: integer, minimum: 1, maximum: 200, default: 25 }
+    FormatParam:
+      in: query
+      name: format
+      schema:
+        type: string
+        enum: [json, csv]
+        default: json
+
+  responses:
+    Unauthorized:
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details:
+          type: object
+          additionalProperties: true
+
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        email: { type: string, format: email }
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+
+    Cliente:
+      type: object
+      properties:
+        id: { type: integer }
+        nombre: { type: string }
+        email: { type: string, format: email }
+        telefono: { type: string }
+        empresa: { type: string }
+        ciudad: { type: string }
+        pais: { type: string }
+        sitio_web: { type: string, format: uri }
+        notas: { type: string }
+        activo: { type: boolean }
+        fecha_creacion: { type: string, format: date-time }
+        fecha_modificacion: { type: string, format: date-time }
+        etiquetas:
+          type: array
+          items: { $ref: "#/components/schemas/Etiqueta" }
+
+    ClienteDetail:
+      allOf:
+        - $ref: "#/components/schemas/Cliente"
+        - type: object
+          properties:
+            contactos:
+              type: array
+              items: { $ref: "#/components/schemas/Contacto" }
+            actividades:
+              type: array
+              items: { $ref: "#/components/schemas/Actividad" }
+
+    ClienteCreate:
+      type: object
+      required: [nombre, email]
+      properties:
+        nombre: { type: string, maxLength: 150 }
+        email: { type: string, format: email, maxLength: 254 }
+        telefono: { type: string, maxLength: 20 }
+        empresa: { type: string, maxLength: 150 }
+        ciudad: { type: string, maxLength: 100 }
+        pais: { type: string, maxLength: 80 }
+        sitio_web: { type: string, format: uri }
+        notas: { type: string }
+
+    ClienteUpdate:
+      $ref: "#/components/schemas/ClienteCreate"
+
+    ClienteList:
+      type: object
+      properties:
+        count: { type: integer }
+        next: { type: string, nullable: true }
+        previous: { type: string, nullable: true }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/Cliente" }
+
+    Contacto:
+      type: object
+      properties:
+        id: { type: integer }
+        nombre: { type: string }
+        cargo: { type: string }
+        email: { type: string, format: email }
+        telefono: { type: string }
+        notas: { type: string }
+        activo: { type: boolean }
+
+    ContactoCreate:
+      type: object
+      required: [nombre]
+      properties:
+        nombre: { type: string, maxLength: 150 }
+        cargo: { type: string, maxLength: 100 }
+        email: { type: string, format: email }
+        telefono: { type: string, maxLength: 20 }
+        notas: { type: string }
+
+    ContactoList:
+      type: object
+      properties:
+        count: { type: integer }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/Contacto" }
+
+    Etapa:
+      type: object
+      properties:
+        id: { type: integer }
+        pipeline: { type: integer }
+        nombre: { type: string }
+        orden: { type: integer }
+        cerrada: { type: boolean }
+        es_ganado: { type: boolean }
+        color: { type: string }
+
+    Pipeline:
+      type: object
+      properties:
+        id: { type: integer }
+        nombre: { type: string }
+        descripcion: { type: string }
+        es_default: { type: boolean }
+        etapas:
+          type: array
+          items: { $ref: "#/components/schemas/Etapa" }
+
+    Oportunidad:
+      type: object
+      properties:
+        id: { type: integer }
+        cliente: { type: integer }
+        titulo: { type: string }
+        descripcion: { type: string }
+        monto:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+          description: Decimal as string
+        etapa: { $ref: "#/components/schemas/Etapa" }
+        asignado_a: { type: integer, nullable: true }
+        fecha_cierre: { type: string, format: date, nullable: true }
+        fecha_creacion: { type: string, format: date-time }
+        fecha_modificacion: { type: string, format: date-time }
+
+    OportunidadCreate:
+      type: object
+      required: [cliente, titulo, monto, etapa]
+      properties:
+        cliente: { type: integer }
+        titulo: { type: string, maxLength: 200 }
+        descripcion: { type: string }
+        monto:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        etapa: { type: integer }
+
+    OportunidadList:
+      type: object
+      properties:
+        count: { type: integer }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/Oportunidad" }
+
+    Actividad:
+      type: object
+      properties:
+        id: { type: integer }
+        cliente: { type: integer }
+        oportunidad: { type: integer, nullable: true }
+        tipo:
+          type: string
+          enum: [llamada, email, reunion]
+        nota: { type: string }
+        fecha: { type: string, format: date-time }
+
+    ActividadCreate:
+      type: object
+      required: [cliente, tipo, nota]
+      properties:
+        cliente: { type: integer }
+        oportunidad: { type: integer }
+        tipo:
+          type: string
+          enum: [llamada, email, reunion]
+        nota: { type: string }
+
+    Etiqueta:
+      type: object
+      properties:
+        id: { type: integer }
+        nombre: { type: string, maxLength: 50 }
+        color: { type: string }
+        descripcion: { type: string }
+
+    AuditLog:
+      type: object
+      properties:
+        id: { type: integer }
+        actor: { type: integer, nullable: true }
+        action:
+          type: string
+          enum: [create, update, delete]
+        model: { type: string }
+        object_id: { type: integer }
+        object_repr: { type: string }
+        changes:
+          type: object
+          additionalProperties: true
+        timestamp: { type: string, format: date-time }
+
+    AuditLogList:
+      type: object
+      properties:
+        count: { type: integer }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/AuditLog" }
+
+    Dashboard:
+      type: object
+      properties:
+        pipeline_por_etapa:
+          type: array
+          items:
+            type: object
+            properties:
+              etapa: { $ref: "#/components/schemas/Etapa" }
+              total:
+                type: string
+                pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+              cantidad: { type: integer }
+        ganado_mes_actual:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        perdido_mes_actual:
+          type: string
+          pattern: "^[0-9]+(\\.[0-9]{1,2})?$"
+        win_rate:
+          type: number
+          minimum: 0
+          maximum: 1
+        top_5_abiertos:
+          type: array
+          items: { $ref: "#/components/schemas/Oportunidad" }
