@@ -79,5 +79,5 @@ class BusquedaGuardada(models.Model):
         unique_together = [("endpoint", "nombre", "creado_por")]
         ordering = ["nombre"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.nombre

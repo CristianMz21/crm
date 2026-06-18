@@ -5,6 +5,8 @@ Exactly one pipeline is marked as default (enforced by signal in
 ``pipeline/signals.py``).
 """
 
+from __future__ import annotations
+
 from core.models import TimeStampedModel
 from django.db import models
 
@@ -21,7 +23,7 @@ class Pipeline(TimeStampedModel):
         verbose_name_plural = "pipelines"
         ordering = ["nombre"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.nombre
 
 
@@ -55,5 +57,5 @@ class Etapa(TimeStampedModel):
             ),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.pipeline.nombre} > {self.nombre}"

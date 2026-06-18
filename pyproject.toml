@@ -36,6 +36,8 @@ dev = [
     "pytest-django>=4.8,<5.0",
     "django-debug-toolbar>=4.4,<6.0",
     "ruff>=0.7,<1.0",
+    "mypy>=2.1.0",
+    "django-stubs>=5.0,<6.0",
 ]
 
 [tool.uv]
@@ -98,3 +100,73 @@ filterwarnings = [
     "ignore::DeprecationWarning:debug_toolbar",
     "ignore::DeprecationWarning:rest_framework",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = []
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_return_any = true
+no_implicit_reexport = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "django.*",
+    "rest_framework.*",
+    "django_filters.*",
+    "debug_toolbar.*",
+    "faker.*",
+    "pytest.*",
+    "_pytest.*",
+]
+ignore_missing_imports = true
+
+# Django models: django-stubs plugin unavailable (mypy 2.1.0 compat).
+# Silence var-annotated for field descriptors (CharField, FK, etc.)
+# that mypy can't infer without the plugin. Real errors still caught.
+[[tool.mypy.overrides]]
+module = [
+    "core.models",
+    "core.managers",
+    "clientes.models",
+    "oportunidades.models",
+    "pipeline.models",
+    "audit.models",
+]
+disable_error_code = ["var-annotated", "no-any-return"]
+
+[[tool.mypy.overrides]]
+module = [
+    "core.admin",
+    "clientes.admin",
+    "oportunidades.admin",
+    "pipeline.admin",
+    "audit.admin",
+]
+disable_error_code = ["type-arg"]
+
+[[tool.mypy.overrides]]
+module = [
+    "pipeline.signals",
+    "clientes.signals",
+    "oportunidades.signals",
+    "audit.services.*",
+    "oportunidades.services.*",
+    "pipeline.migrations.*",
+    "clientes.migrations.*",
+    "oportunidades.migrations.*",
+    "audit.migrations.*",
+    "core.migrations.*",
+]
+ignore_errors = true

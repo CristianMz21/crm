@@ -5,12 +5,17 @@ stages.  These are the canonical entry points — views and signals
 call these rather than manipulating models directly.
 """
 
+from __future__ import annotations
+
 from datetime import date
 
+from django.contrib.auth.models import User
 from pipeline.models import Etapa, Pipeline
 
+from oportunidades.models import Oportunidad
 
-def ensure_default_pipeline():
+
+def ensure_default_pipeline() -> Pipeline:
     """Create the default pipeline with 4 stages if it doesn't exist.
 
     Stages: Nuevo, En proceso, Ganado, Perdido.
@@ -52,7 +57,12 @@ def ensure_default_pipeline():
     return pipeline
 
 
-def mover_etapa(oportunidad, etapa_id, *, actor=None):
+def mover_etapa(
+    oportunidad: Oportunidad,
+    etapa_id: int,
+    *,
+    actor: User | None = None,
+) -> Oportunidad:
     """Move an opportunity to a new pipeline stage.
 
     Automatically sets ``fecha_cierre`` when moving to a closed

@@ -5,6 +5,8 @@ Every create/update/delete on a business model produces an
 The ``changes`` field stores a JSON diff of old vs new values.
 """
 
+from __future__ import annotations
+
 from django.conf import settings
 from django.db import models
 
@@ -12,7 +14,7 @@ from django.db import models
 class AuditLog(models.Model):
     """Immutable record of a mutation on a business model."""
 
-    ACTION_CHOICES = [
+    ACTION_CHOICES: list[tuple[str, str]] = [
         ("create", "Create"),
         ("update", "Update"),
         ("delete", "Delete"),
@@ -41,5 +43,5 @@ class AuditLog(models.Model):
             models.Index(fields=["timestamp"], name="audit_timestamp_idx"),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.action} {self.model}:{self.object_id}"

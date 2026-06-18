@@ -5,6 +5,8 @@ business.  ``Contacto`` is a person at a client.  ``Etiqueta`` is
 a reusable tag applied to clients via M2M.
 """
 
+from __future__ import annotations
+
 from core.managers import SoftDeleteManager
 from core.models import AuditModel, SoftDeleteModel, TimeStampedModel
 from django.db import models
@@ -38,10 +40,10 @@ class Cliente(TimeStampedModel, SoftDeleteModel, AuditModel):
         verbose_name_plural = "clientes"
         ordering = ["nombre"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.nombre
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("cliente_detail", kwargs={"pk": self.pk})
 
 
@@ -68,7 +70,7 @@ class Contacto(TimeStampedModel, SoftDeleteModel, AuditModel):
         verbose_name_plural = "contactos"
         ordering = ["cliente", "nombre"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.nombre} ({self.cliente.nombre})"
 
 
@@ -84,5 +86,5 @@ class Etiqueta(TimeStampedModel):
         verbose_name_plural = "etiquetas"
         ordering = ["nombre"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.nombre

@@ -4,10 +4,14 @@ Creates Pipeline Default with stages: Nuevo, En proceso, Ganado, Perdido.
 Idempotent: skips if any pipelines already exist.
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 from django.db import migrations
 
 
-def seed_pipeline(apps, schema_editor):
+def seed_pipeline(apps: Any, schema_editor: Any) -> None:
     Pipeline = apps.get_model("pipeline", "Pipeline")
     Etapa = apps.get_model("pipeline", "Etapa")
 

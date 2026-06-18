@@ -5,6 +5,11 @@ between old and new model states.  Called by ``post_save`` and
 ``post_delete`` signal handlers in each business app.
 """
 
+from __future__ import annotations
+
+from typing import Any
+
+from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 
 from audit.models import AuditLog
@@ -13,7 +18,13 @@ from audit.models import AuditLog
 _DIFF_EXCLUDE_FIELDS = frozenset({"fecha_creacion", "fecha_modificacion", "id"})
 
 
-def log_action(*, actor, action, instance, changes):
+def log_action(
+    *,
+    actor: User | None,
+    action: str,
+    instance: Any,
+    changes: dict[str, Any],
+) -> None:
     """Create an AuditLog entry for a model mutation.
 
     Args:
@@ -35,7 +46,7 @@ def log_action(*, actor, action, instance, changes):
     )
 
 
-def compute_diff(instance):
+def compute_diff(instance: Any) -> dict[str, dict[str, Any]]:
     """Compute the field-level diff between DB and current instance.
 
     Re-fetches the instance from the database and compares each
@@ -54,14 +65,14 @@ def compute_diff(instance):
         return {}
 
     try:
-        db_instance = instance.__class__.objects_all.get(pk=instance.pk)
+        db_instance = instance.__class__.objects_all.get(pk=instance.pk)  # type: ignore[attr-defined]
     except instance.__class__.DoesNotExist:
         return {}
 
     old_dict = model_to_dict(db_instance)
     new_dict = model_to_dict(instance)
 
-    diff = {}
+    diff: dict[str, dict[str, Any]] = {}
     for field_name, new_value in new_dict.items():
         if field_name in _DIFF_EXCLUDE_FIELDS:
             continue
