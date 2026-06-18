@@ -2,6 +2,9 @@
 
 > Source of truth for the entities, fields, relationships, and
 > data-layer decisions. Updated whenever a model changes.
+>
+> **ADR-001**: Models are organized into 6 apps by bounded context.
+> See `adr-001-bounded-context-apps.md` for the rationale.
 
 ## Entity-Relationship Diagram
 
@@ -35,6 +38,42 @@
 
 ## Entities
 
+### `core.TimeStampedModel` (abstract)
+
+Shared base model. Inherited by every concrete model that needs
+created/modified timestamps.
+
+| Field | Type | Notes |
+|---|---|---|
+| `fecha_creacion` | `DateTimeField(auto_now_add=True)` | Set once |
+| `fecha_modificacion` | `DateTimeField(auto_now=True)` | Updated on every save |
+
+`class Meta: abstract = True`.
+
+### `core.SoftDeleteModel` (abstract)
+
+Shared base model. Inherited by every concrete model that supports
+soft delete via the `activo` flag.
+
+| Field | Type | Notes |
+|---|---|---|
+| `activo` | `BooleanField(default=True)` | Soft delete flag |
+
+`class Meta: abstract = True`. Concrete models get a custom manager
+that filters `activo=True` by default; `objects_all` returns
+everything.
+
+### `core.AuditModel` (abstract)
+
+Shared base model. Inherited by every concrete model that needs
+to track who created it.
+
+| Field | Type | Notes |
+|---|---|---|
+| `creado_por` | `ForeignKey(User, on_delete=PROTECT, related_name="+")` | Audit |
+
+`class Meta: abstract = True`.
+
 ### `auth.User` (Django built-in)
 
 The system uses the built-in Django User. The owner is the first
@@ -43,6 +82,8 @@ single-user; the data model allows multiple users so that the
 assignment feature works.
 
 ### `clientes.Cliente`
+
+Inherits from `core.TimeStampedModel`, `core.SoftDeleteModel`, `core.AuditModel`.
 
 | Field | Type | Notes |
 |---|---|---|
@@ -106,7 +147,7 @@ enforces this.
 `Meta.ordering = ["pipeline", "orden"]`. The unique constraint
 `(pipeline, orden)` is at the DB level.
 
-### `clientes.Oportunidad`
+### `oportunidades.Oportunidad`
 
 | Field | Type | Notes |
 |---|---|---|
@@ -124,7 +165,7 @@ enforces this.
 `Meta.ordering = ["-fecha_creacion"]`. Index on `(etapa, activo)`
 (implicit via FK on etapa).
 
-### `clientes.Actividad`
+### `oportunidades.Actividad`
 
 | Field | Type | Notes |
 |---|---|---|
@@ -177,7 +218,7 @@ For `delete` actions, only `"old"` is present (no `new`).
 For `update` actions, both are present, but only for changed
 fields.
 
-### `clientes.BusquedaGuardada`
+### `core.BusquedaGuardada`
 
 | Field | Type | Notes |
 |---|---|---|

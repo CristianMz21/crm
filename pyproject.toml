@@ -44,7 +44,7 @@ package = false
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-src = ["clientes", "pipeline", "audit", "dashboard", "config"]
+src = ["core", "clientes", "oportunidades", "pipeline", "audit", "dashboard", "config"]
 
 [tool.ruff.lint]
 select = [
@@ -81,7 +81,9 @@ python_files = ["test_*.py", "tests.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 testpaths = [
+    "core/tests",
     "clientes/tests",
+    "oportunidades/tests",
     "pipeline/tests",
     "audit/tests",
     "dashboard/tests",

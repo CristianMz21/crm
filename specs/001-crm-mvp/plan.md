@@ -77,66 +77,80 @@ specs/001-crm-mvp/
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py
-├── clientes/                    # main app: Cliente, Contacto, Oportunidad, Actividad, Etiqueta
-│   ├── apps.py
+├── core/                        # shared infrastructure
+│   ├── models.py                # abstract: TimeStampedModel, SoftDeleteModel, AuditModel
+│   ├── managers.py              # SoftDeleteManager
+│   ├── api/
+│   │   ├── serializers.py       # BusquedaGuardadaSerializer
+│   │   ├── views.py             # BusquedaGuardadaViewSet
+│   │   └── urls.py
+│   ├── migrations/
+│   └── tests/
+├── clientes/                    # contact management: Cliente, Contacto, Etiqueta
 │   ├── models.py
 │   ├── managers.py
-│   ├── signals.py
+│   ├── signals.py               # audit log hooks
 │   ├── admin.py
 │   ├── views.py                 # vanilla Django views (HTML)
 │   ├── urls.py
 │   ├── forms.py
-│   ├── api/                     # DRF layer
-│   │   ├── __init__.py
+│   ├── api/
 │   │   ├── serializers.py
 │   │   ├── views.py             # ViewSets
-│   │   ├── filters.py           # django-filter FilterSets
+│   │   ├── filters.py           # FilterSets
 │   │   ├── permissions.py
 │   │   ├── renderers.py         # CSV streaming renderer
 │   │   └── urls.py
-│   ├── services/                # business logic that is not a view
-│   │   ├── __init__.py
-│   │   ├── pipeline.py          # mover_etapa, ensure_default_pipeline
+│   ├── services/
 │   │   └── audit.py             # diff helpers
 │   ├── migrations/
-│   │   ├── 0001_initial.py
-│   │   └── 0002_seed_default_pipeline.py
 │   └── tests/
-│       ├── __init__.py
-│       ├── conftest.py
-│       ├── test_models.py
-│       ├── test_managers.py
-│       ├── test_api_auth.py
-│       ├── test_api_clientes.py
-│       ├── test_api_oportunidades.py
-│       ├── test_api_actividades.py
-│       ├── test_api_export.py
-│       ├── test_api_dashboard.py
-│       ├── test_orm.py          # assertNumQueries
-│       ├── test_signals.py
-│       └── test_pipeline.py
-├── pipeline/                    # pipeline + stage models
-│   ├── apps.py
+├── oportunidades/               # sales pipeline: Oportunidad, Actividad
 │   ├── models.py
-│   ├── admin.py
+│   ├── managers.py
 │   ├── signals.py
+│   ├── admin.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── forms.py
+│   ├── api/
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── filters.py
+│   │   ├── permissions.py
+│   │   └── urls.py
+│   ├── services/
+│   │   ├── pipeline.py          # mover_etapa, ensure_default_pipeline
+│   │   └── audit.py
 │   ├── migrations/
 │   └── tests/
-│       └── test_models.py
-├── audit/                       # audit log models
-│   ├── apps.py
+├── pipeline/                    # pipeline configuration: Pipeline, Etapa
+│   ├── models.py
+│   ├── signals.py               # ensure single default pipeline
+│   ├── admin.py
+│   ├── api/
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   └── urls.py
+│   ├── migrations/
+│   └── tests/
+├── audit/                       # audit trail: AuditLog
 │   ├── models.py
 │   ├── admin.py
+│   ├── api/
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── filters.py
+│   │   └── urls.py
 │   ├── migrations/
 │   └── tests/
-│       └── test_signals.py
-├── dashboard/                   # dashboard endpoint
-│   ├── apps.py
+├── dashboard/                   # analytics: no models, read-only endpoint
 │   ├── views.py
 │   ├── services.py              # aggregations
+│   ├── api/
+│   │   └── urls.py
 │   ├── urls.py
 │   └── tests/
-│       └── test_dashboard.py
 ├── templates/
 │   ├── base.html
 │   ├── registration/
@@ -146,24 +160,23 @@ specs/001-crm-mvp/
 │       ├── cliente_list.html
 │       ├── cliente_detail.html
 │       └── cliente_form.html
+├── conftest.py                  # project-wide pytest fixtures (api_client, authenticated_client)
 ├── seed.py                      # Faker-based seeder
 ├── manage.py
 ├── pyproject.toml
 ├── requirements.txt
-├── .specify/                    # spec-kit configuration
-├── specs/                       # spec-kit specs (this folder)
-└── openspec/                    # [REMOVED] replaced by .specify/ + specs/
+└── .specify/                    # spec-kit configuration
 ```
 
-**Structure Decision**: Four Django apps (`clientes`, `pipeline`,
-`audit`, `dashboard`) inside one project. The split follows
-bounded contexts that are obvious to the user: clients-and-relations
-(`clientes`), the pipeline (`pipeline`), the audit trail
-(`audit`), and the dashboard endpoint (`dashboard`). Cross-app
-FKs are explicit. Each app has its own tests folder. The `api/`
-subfolder of `clientes/` is the DRF layer; if the API grows to
-cover `pipeline` and `dashboard`, a top-level `api/` may be
-extracted in v2.
+**Structure Decision**: Six Django apps (`core`, `clientes`,
+`oportunidades`, `pipeline`, `audit`, `dashboard`) inside one
+project, organized by bounded context. See `adr-001-bounded-context-apps.md`
+for the full rationale. The split follows domain boundaries that
+are obvious to the user: shared infra (`core`), contacts
+(`clientes`), sales pipeline (`oportunidades`), pipeline config
+(`pipeline`), audit trail (`audit`), and analytics (`dashboard`).
+Cross-app FKs are explicit. Each app has its own `api/`,
+`services/`, and `tests/` subfolder.
 
 ## Migration strategy
 

@@ -41,8 +41,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "debug_toolbar",
-    # Local apps
+    # Local apps (ordered by dependency: core first, dashboard last)
+    "core",
     "clientes",
+    "oportunidades",
     "pipeline",
     "audit",
     "dashboard",

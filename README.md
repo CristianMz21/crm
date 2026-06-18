@@ -188,80 +188,60 @@ ya es usable. Lo demás es valor incremental.
 ```text
 crm/
 ├── config/                          # proyecto Django (settings, urls, wsgi)
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
 │
-├── clientes/                        # Cliente, Contacto, Oportunidad, Actividad, Etiqueta
+├── core/                            # infraestructura compartida
+│   ├── models.py                    # abstract: TimeStampedModel, SoftDeleteModel, AuditModel
+│   ├── managers.py                  # SoftDeleteManager
+│   └── api/                         # BusquedaGuardada endpoint
+│
+├── clientes/                        # gestión de contactos: Cliente, Contacto, Etiqueta
 │   ├── api/                         # capa DRF
 │   │   ├── serializers.py
 │   │   ├── views.py
 │   │   ├── filters.py
 │   │   ├── renderers.py            # CSV streaming
 │   │   └── urls.py
-│   ├── services/                    # lógica que no es vista
-│   │   ├── pipeline.py              # mover_etapa
-│   │   └── audit.py                 # compute_diff
+│   ├── services/
 │   ├── models.py
-│   ├── managers.py                  # custom manager (soft delete)
-│   ├── signals.py                   # audit log
+│   ├── managers.py
+│   ├── signals.py
 │   ├── admin.py
-│   ├── views.py                     # vistas HTML mínimas
-│   ├── urls.py
-│   ├── forms.py
-│   ├── migrations/
 │   └── tests/
-│       ├── conftest.py
-│       ├── test_models.py
-│       ├── test_managers.py
-│       ├── test_api_*.py
-│       ├── test_orm.py             # assertNumQueries
-│       ├── test_audit.py
-│       └── test_signals.py
 │
-├── pipeline/                        # Pipeline + Etapa
-├── audit/                           # AuditLog + signals
-├── dashboard/                       # endpoint /api/dashboard/
+├── oportunidades/                   # pipeline de ventas: Oportunidad, Actividad
+│   ├── api/
+│   ├── services/
+│   │   └── pipeline.py              # mover_etapa
+│   ├── models.py
+│   └── tests/
+│
+├── pipeline/                        # configuración de pipeline: Pipeline, Etapa
+│   ├── api/
+│   └── tests/
+│
+├── audit/                           # audit trail: AuditLog
+│   ├── api/
+│   └── tests/
+│
+├── dashboard/                       # analytics: sin modelos, solo endpoints
+│   ├── services.py
+│   └── tests/
 │
 ├── templates/                       # HTML mínimo
 │
+├── conftest.py                      # fixtures pytest project-wide
+│
 ├── .specify/                        # spec-kit
-│   ├── memory/
-│   │   └── constitution.md          # 8 principios
-│   ├── templates/                   # templates para /speckit.*
-│   ├── scripts/
-│   └── extensions/
+│   └── memory/constitution.md
 │
-├── specs/                           # specs por feature
-│   └── 001-crm-mvp/
-│       ├── spec.md
-│       ├── plan.md
-│       ├── data-model.md
-│       ├── research.md
-│       ├── quickstart.md
-│       ├── tasks.md
-│       └── contracts/
-│           └── api.yaml
+├── specs/001-crm-mvp/               # spec del MVP
 │
-├── .github/
-│   ├── agents/speckit.*.agent.md    # definiciones de los /speckit.* commands
-│   ├── prompts/speckit.*.prompt.md
-│   ├── workflows/                   # CI (pytest, ruff)
-│   ├── ISSUE_TEMPLATE/
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   ├── dependabot.yml
-│   └── CODEOWNERS
+├── .github/                         # CI, issue templates, agents
 │
-├── seed.py                          # seeder con Faker
+├── seed.py
 ├── manage.py
 ├── pyproject.toml
-├── requirements.txt
-├── LICENSE
-├── README.md
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-└── SECURITY.md
+└── LICENSE
 ```
 
 ---

@@ -1,4 +1,4 @@
-"""API URL configuration for the clientes app."""
+"""API URL configuration for the pipeline app."""
 
 from rest_framework.routers import DefaultRouter
 
