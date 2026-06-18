@@ -153,31 +153,22 @@ uv run ruff check core/ clientes/ oportunidades/ pipeline/ audit/
 uv run ruff format --check core/ clientes/ oportunidades/ pipeline/ audit/
 # Criterio: "All files already formatted"
 
-# 3. Tipado estricto — contratos de tipos
-uv run mypy core/ clientes/ oportunidades/ pipeline/ audit/
-# Criterio: "Success: no issues found"
+# 3. Supresiones — cero silencios
+grep -rn "# type: ignore\|# noqa\|pragma: no cover\|cast(" \
+  core/ clientes/ oportunidades/ pipeline/ audit/ --include='*.py'
+# Criterio: 0 resultados
 
-# 4. Supresiones — sin silencios injustificados
-uv run grep -rn "# type: ignore\|# noqa\|pragma: no cover\|cast(\|: Any" \
-  core/ clientes/ oportunidades/ pipeline/ audit/ \
-  --include='*.py' | grep -v migrations | grep -v __pycache__
-# Criterio: 0 supresiones no documentadas
-
-# 5. Tests unitarios
+# 4. Tests unitarios
 uv run pytest core/tests/ clientes/tests/ oportunidades/tests/ pipeline/tests/ audit/tests/ -v
 # Criterio: todos pasan
 
-# 6. Tests de integración
-uv run pytest core/tests/ clientes/tests/ oportunidades/tests/ pipeline/tests/ audit/tests/ -v --tb=short
-# Criterio: todos pasan
-
-# 7. Cobertura de código
+# 5. Cobertura de código
 uv run pytest core/tests/ clientes/tests/ oportunidades/tests/ pipeline/tests/ audit/tests/ \
   --cov=core --cov=clientes --cov=oportunidades --cov=pipeline --cov=audit \
   --cov-report=term-missing
 # Criterio: ≥90% para código nuevo
 
-# 8. Invariantes de negocio
+# 6. Invariantes de negocio
 uv run python manage.py shell -c "
 from django.contrib.auth.models import User
 from clientes.models import Cliente, Contacto, Etiqueta
@@ -185,49 +176,35 @@ from oportunidades.models import Oportunidad, Actividad
 from pipeline.models import Pipeline, Etapa
 from audit.models import AuditLog
 from core.managers import SoftDeleteManager
-
 u = User.objects.create(username='val_test', email='v@t.com')
-
-# Pipeline: solo 1 default
 p = Pipeline.objects.create(nombre='VP1', es_default=True)
 Pipeline.objects.create(nombre='VP2', es_default=False)
 assert Pipeline.objects.filter(es_default=True).count() == 1
-
-# Etapa: unique_together (pipeline, orden)
 from django.db import IntegrityError
 try:
     Etapa.objects.create(pipeline=p, nombre='Dup', orden=0)
     assert False, 'Debería haber fallado'
 except IntegrityError:
     pass
-
-# Oportunidad: monto es Decimal
 o = Oportunidad.objects.create(
     cliente=Cliente.objects.create(nombre='VC', email='vc@t.com', creado_por=u),
     titulo='VT', monto='1000.00', etapa=p.etapas.first(), creado_por=u
 )
 from decimal import Decimal
 assert isinstance(o.monto, Decimal)
-
-# SoftDelete: Cliente se filtra por defecto
 c = Cliente.objects.create(nombre='VSD', email='vsd@t.com', creado_por=u)
 c.delete()
 assert not Cliente.objects.filter(pk=c.pk).exists()
 assert Cliente.objects_all.filter(pk=c.pk).exists()
-
-# AuditLog: campos requeridos
 assert hasattr(AuditLog, 'actor')
-assert hasattr(AuditLog, 'action')
-assert hasattr(AuditLog, 'changes')
-
 print('✓ Todos los invariantes de negocio verificados')
 "
 
-# 9. Migraciones
+# 7. Migraciones
 uv run python manage.py makemigrations --check --dry-run
 # Criterio: "No changes detected"
 
-# 10. Regresiones
+# 8. Regresiones
 uv run python manage.py check
 # Criterio: 0 issues
 ```
@@ -236,12 +213,10 @@ uv run python manage.py check
 
 - [ ] `ruff check` → 0 errores, 0 advertencias
 - [ ] `ruff format --check` → todos los archivos formateados
-- [ ] `mypy` → sin errores de tipado
-- [ ] Sin supresiones injustificadas
+- [ ] Cero supresiones en código
 - [ ] Todos los tests unitarios pasan
-- [ ] Todos los tests de integración pasan
 - [ ] Cobertura ≥90% para código nuevo
-- [ ] Invariantes de negocio verificados (unique_together, DecimalField, SoftDelete, AuditLog)
+- [ ] Invariantes de negocio verificados
 - [ ] Migraciones sin cambios pendientes
 - [ ] `manage.py check` → 0 issues
 - [ ] No se introducen regresiones

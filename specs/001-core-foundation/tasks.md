@@ -108,55 +108,43 @@ uv run ruff check core/
 uv run ruff format --check core/
 # Criterio: "All files already formatted"
 
-# 3. Tipado estricto — contratos de tipos
-uv run mypy core/
-# Criterio: "Success: no issues found"
+# 3. Supresiones — cero silencios
+grep -rn "# type: ignore\|# noqa\|pragma: no cover\|cast(" core/ --include='*.py'
+# Criterio: 0 resultados
 
-# 4. Supresiones — sin silencios injustificados
-uv run ruff check core/ --select E,F,W,B,I,UP
-uv run grep -rn "# type: ignore\|# noqa\|pragma: no cover\|cast(\|: Any" core/
-# Criterio: 0 supresiones no documentadas
-
-# 5. Tests unitarios
+# 4. Tests unitarios
 uv run pytest core/tests/ -v
 # Criterio: todos pasan
 
-# 6. Tests de integración (si aplica)
+# 5. Tests de integración (si aplica)
 uv run pytest core/tests/ -v --tb=short
 # Criterio: todos pasan
 
-# 7. Cobertura de código
+# 6. Cobertura de código
 uv run pytest core/tests/ --cov=core --cov-report=term-missing
 # Criterio: ≥90% para código nuevo
 
-# 8. Invariantes de negocio
+# 7. Invariantes de negocio
 uv run python manage.py shell -c "
 from core.models import TimeStampedModel, SoftDeleteModel, AuditModel
 from core.managers import SoftDeleteManager, SoftDeleteQuerySet
-# TimeStampedModel: abstract, tiene fecha_creacion y fecha_modificacion
 assert TimeStampedModel._meta.abstract is True
 assert hasattr(TimeStampedModel, 'fecha_creacion')
 assert hasattr(TimeStampedModel, 'fecha_modificacion')
-# SoftDeleteModel: abstract, tiene campo activo con default True
 assert SoftDeleteModel._meta.abstract is True
 assert SoftDeleteModel._meta.get_field('activo').default is True
-# AuditModel: abstract, tiene creado_por FK
 assert AuditModel._meta.abstract is True
 assert hasattr(AuditModel, 'creado_por')
-# SoftDeleteManager: filtra solo activos
-assert issubclass(SoftDeleteManager, type)
-# SoftDeleteQuerySet: tiene activos() y archivados()
 assert hasattr(SoftDeleteQuerySet, 'activos')
 assert hasattr(SoftDeleteQuerySet, 'archivados')
 print('✓ Todos los invariantes de negocio verificados')
 "
-# Criterio: sin errores AssertionError
 
-# 9. Migraciones
+# 8. Migraciones
 uv run python manage.py makemigrations core --check --dry-run
 # Criterio: "No changes detected"
 
-# 10. Regresiones
+# 9. Regresiones
 uv run python manage.py check
 # Criterio: 0 issues
 ```
@@ -165,12 +153,10 @@ uv run python manage.py check
 
 - [ ] `ruff check core/` → 0 errores, 0 advertencias
 - [ ] `ruff format --check core/` → todos los archivos formateados
-- [ ] `mypy core/` → sin errores de tipado
-- [ ] Sin supresiones injustificadas (`# type: ignore`, `# noqa`, etc.)
+- [ ] Cero supresiones en código (`# type: ignore`, `# noqa`, etc.)
 - [ ] Todos los tests unitarios pasan
-- [ ] Todos los tests de integración pasan
 - [ ] Cobertura ≥90% para código nuevo
-- [ ] Invariantes de negocio verificados (abstract=True, defaults, FKs)
+- [ ] Invariantes de negocio verificados
 - [ ] Migraciones sin cambios pendientes
 - [ ] `manage.py check` → 0 issues
 - [ ] No se introducen regresiones

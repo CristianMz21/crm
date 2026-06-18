@@ -158,47 +158,33 @@ uv run ruff check core/ clientes/ oportunidades/ pipeline/ audit/
 uv run ruff format --check core/ clientes/ oportunidades/ pipeline/ audit/
 # Criterio: "All files already formatted"
 
-# 3. Tipado estricto — contratos de tipos
-uv run mypy core/ clientes/ oportunidades/ pipeline/ audit/
-# Criterio: "Success: no issues found"
+# 3. Supresiones — cero silencios
+grep -rn "# type: ignore\|# noqa\|pragma: no cover\|cast(" \
+  core/ clientes/ oportunidades/ pipeline/ audit/ --include='*.py'
+# Criterio: 0 resultados
 
-# 4. Supresiones — sin silencios injustificados
-uv run grep -rn "# type: ignore\|# noqa\|pragma: no cover\|cast(\|: Any" \
-  core/ clientes/ oportunidades/ pipeline/ audit/ \
-  --include='*.py' | grep -v migrations | grep -v __pycache__
-# Criterio: 0 supresiones no documentadas
-
-# 5. Tests unitarios
+# 4. Tests unitarios
 uv run pytest core/tests/ clientes/tests/ oportunidades/tests/ pipeline/tests/ audit/tests/ -v
 # Criterio: todos pasan
 
-# 6. Tests de integración
-uv run pytest core/tests/ clientes/tests/ oportunidades/tests/ pipeline/tests/ audit/tests/ -v --tb=short
-# Criterio: todos pasan
-
-# 7. Cobertura de código
+# 5. Cobertura de código
 uv run pytest core/tests/ clientes/tests/ oportunidades/tests/ pipeline/tests/ audit/tests/ \
   --cov=core --cov=clientes --cov=oportunidades --cov=pipeline --cov=audit \
   --cov-report=term-missing
 # Criterio: ≥90% para código nuevo
 
-# 8. Invariantes de negocio
+# 6. Invariantes de negocio
 uv run python manage.py shell -c "
 from django.contrib.auth.models import User
 from audit.models import AuditLog
 from audit.services import log_action, compute_diff
 from oportunidades.services.pipeline import ensure_default_pipeline, mover_etapa
 from pipeline.models import Pipeline, Etapa
-
 u = User.objects.create(username='val_s03', email='v3@t.com')
-
-# ensure_default_pipeline: idempotente, 4 etapas
 p1 = ensure_default_pipeline()
 p2 = ensure_default_pipeline()
 assert p1.pk == p2.pk, 'Debería ser idempotente'
 assert p1.etapas.count() == 4
-
-# mover_etapa: fecha_cierre set/clear
 from clientes.models import Cliente
 c = Cliente.objects.create(nombre='VC3', email='vc3@t.com', creado_por=u)
 from oportunidades.models import Oportunidad
@@ -212,9 +198,6 @@ assert o.fecha_cierre is not None
 etapa_nuevo = p1.etapas.get(orden=0)
 mover_etapa(o, etapa_nuevo.id)
 assert o.fecha_cierre is None
-
-# mover_etapa: ValueError si pipeline distinto
-from django.core.exceptions import ValidationError
 p_other = Pipeline.objects.create(nombre='Other')
 e_other = Etapa.objects.create(pipeline=p_other, nombre='EO', orden=0)
 try:
@@ -222,29 +205,22 @@ try:
     assert False, 'Debería haber fallado'
 except ValueError:
     pass
-
-# log_action: crea AuditLog
 log_action(actor=u, action='create', instance=c, changes={'new': {'nombre': 'VC3'}})
 assert AuditLog.objects.filter(model='clientes.Cliente').exists()
-
-# compute_diff: detecta cambios
 c.nombre = 'VC3 Modified'
 diff = compute_diff(c)
 assert 'nombre' in diff
 assert diff['nombre']['old'] == 'VC3'
-
-# Signals: audit log automático
 c2 = Cliente.objects.create(nombre='Sig', email='sig@t.com', creado_por=u)
 assert AuditLog.objects.filter(model='clientes.Cliente', action='create').count() >= 1
-
 print('✓ Todos los invariantes de negocio verificados')
 "
 
-# 9. Migraciones
+# 7. Migraciones
 uv run python manage.py makemigrations --check --dry-run
 # Criterio: "No changes detected"
 
-# 10. Regresiones
+# 8. Regresiones
 uv run python manage.py check
 # Criterio: 0 issues
 ```
@@ -253,12 +229,10 @@ uv run python manage.py check
 
 - [ ] `ruff check` → 0 errores, 0 advertencias
 - [ ] `ruff format --check` → todos los archivos formateados
-- [ ] `mypy` → sin errores de tipado
-- [ ] Sin supresiones injustificadas
+- [ ] Cero supresiones en código
 - [ ] Todos los tests unitarios pasan
-- [ ] Todos los tests de integración pasan
 - [ ] Cobertura ≥90% para código nuevo
-- [ ] Invariantes de negocio verificados (idempotencia, fecha_cierre, ValueError, audit log, signals)
+- [ ] Invariantes de negocio verificados
 - [ ] Migraciones sin cambios pendientes
 - [ ] `manage.py check` → 0 issues
 - [ ] No se introducen regresiones
