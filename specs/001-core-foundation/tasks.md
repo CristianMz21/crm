@@ -19,7 +19,7 @@ Write an abstract model with:
 uv run python manage.py shell -c "from core.models import TimeStampedModel; print(TimeStampedModel._meta.abstract)"
 # → True
 ```
-- [ ] S001 done
+- [x] S001 done
 
 ---
 
@@ -37,7 +37,7 @@ Write an abstract model with:
 uv run python manage.py shell -c "from core.models import SoftDeleteModel; print(SoftDeleteModel._meta.get_field('activo').default)"
 # → True
 ```
-- [ ] S002 done
+- [x] S002 done
 
 ---
 
@@ -55,7 +55,7 @@ Write an abstract model with:
 uv run python manage.py shell -c "from core.models import AuditModel; print(AuditModel._meta.abstract)"
 # → True
 ```
-- [ ] S003 done
+- [x] S003 done
 
 ---
 
@@ -73,7 +73,7 @@ Write:
 uv run python manage.py shell -c "from core.managers import SoftDeleteManager, SoftDeleteQuerySet; print(SoftDeleteManager, SoftDeleteQuerySet)"
 # → <class 'core.managers.SoftDeleteManager'> <class 'core.managers.SoftDeleteQuerySet'>
 ```
-- [ ] S004 done
+- [x] S004 done
 
 ---
 
@@ -89,4 +89,4 @@ uv run ruff format --check core/
 
 All 4 pass → core foundation ready.
 
-- [ ] S005 checkpoint passed ✅
+- [x] S005 checkpoint passed ✅
