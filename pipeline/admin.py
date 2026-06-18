@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.contrib import admin
 
 from pipeline.models import Etapa, Pipeline
@@ -13,7 +15,7 @@ class EtapaInline(admin.TabularInline):
 class PipelineAdmin(admin.ModelAdmin):
     list_display = ("nombre", "es_default", "descripcion")
     list_filter = ("es_default",)
-    inlines = [EtapaInline]
+    inlines: ClassVar[list[type[admin.TabularInline]]] = [EtapaInline]
 
 
 @admin.register(Etapa)

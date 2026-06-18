@@ -7,6 +7,8 @@ a reusable tag applied to clients via M2M.
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from core.managers import SoftDeleteManager
 from core.models import AuditModel, SoftDeleteModel, TimeStampedModel
 from django.db import models
@@ -38,7 +40,7 @@ class Cliente(TimeStampedModel, SoftDeleteModel, AuditModel):
     class Meta:
         verbose_name = "cliente"
         verbose_name_plural = "clientes"
-        ordering = ["nombre"]
+        ordering: ClassVar[list[str]] = ["nombre"]
 
     def __str__(self) -> str:
         return self.nombre
@@ -68,7 +70,7 @@ class Contacto(TimeStampedModel, SoftDeleteModel, AuditModel):
     class Meta:
         verbose_name = "contacto"
         verbose_name_plural = "contactos"
-        ordering = ["cliente", "nombre"]
+        ordering: ClassVar[list[str]] = ["cliente", "nombre"]
 
     def __str__(self) -> str:
         return f"{self.nombre} ({self.cliente.nombre})"
@@ -84,7 +86,7 @@ class Etiqueta(TimeStampedModel):
     class Meta:
         verbose_name = "etiqueta"
         verbose_name_plural = "etiquetas"
-        ordering = ["nombre"]
+        ordering: ClassVar[list[str]] = ["nombre"]
 
     def __str__(self) -> str:
         return self.nombre

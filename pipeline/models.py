@@ -7,6 +7,8 @@ Exactly one pipeline is marked as default (enforced by signal in
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from core.models import TimeStampedModel
 from django.db import models
 
@@ -21,7 +23,7 @@ class Pipeline(TimeStampedModel):
     class Meta:
         verbose_name = "pipeline"
         verbose_name_plural = "pipelines"
-        ordering = ["nombre"]
+        ordering: ClassVar[list[str]] = ["nombre"]
 
     def __str__(self) -> str:
         return self.nombre
@@ -49,8 +51,8 @@ class Etapa(TimeStampedModel):
     class Meta:
         verbose_name = "etapa"
         verbose_name_plural = "etapas"
-        ordering = ["pipeline", "orden"]
-        constraints = [
+        ordering: ClassVar[list[str]] = ["pipeline", "orden"]
+        constraints: ClassVar[list[models.UniqueConstraint]] = [
             models.UniqueConstraint(
                 fields=["pipeline", "orden"],
                 name="unique_orden_per_pipeline",

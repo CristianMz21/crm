@@ -7,6 +7,8 @@ The ``changes`` field stores a JSON diff of old vs new values.
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from django.conf import settings
 from django.db import models
 
@@ -14,7 +16,7 @@ from django.db import models
 class AuditLog(models.Model):
     """Immutable record of a mutation on a business model."""
 
-    ACTION_CHOICES: list[tuple[str, str]] = [
+    ACTION_CHOICES: ClassVar[list[tuple[str, str]]] = [
         ("create", "Create"),
         ("update", "Update"),
         ("delete", "Delete"),
@@ -37,8 +39,8 @@ class AuditLog(models.Model):
     class Meta:
         verbose_name = "audit log"
         verbose_name_plural = "audit logs"
-        ordering = ["-timestamp"]
-        indexes = [
+        ordering: ClassVar[list[str]] = ["-timestamp"]
+        indexes: ClassVar[list[models.Index]] = [
             models.Index(fields=["model", "object_id"], name="audit_model_obj_idx"),
             models.Index(fields=["timestamp"], name="audit_timestamp_idx"),
         ]

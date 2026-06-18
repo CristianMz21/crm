@@ -65,7 +65,7 @@ def compute_diff(instance: Any) -> dict[str, dict[str, Any]]:
         return {}
 
     try:
-        db_instance = instance.__class__.objects_all.get(pk=instance.pk)  # type: ignore[attr-defined]
+        db_instance = instance.__class__.objects_all.get(pk=instance.pk)
     except instance.__class__.DoesNotExist:
         return {}
 

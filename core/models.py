@@ -4,6 +4,8 @@ Every concrete business model inherits from one or more of these
 to avoid duplicating timestamp, soft-delete, and audit fields.
 """
 
+from typing import ClassVar
+
 from django.db import models
 
 
@@ -76,8 +78,10 @@ class BusquedaGuardada(models.Model):
     class Meta:
         verbose_name = "búsqueda guardada"
         verbose_name_plural = "búsquedas guardadas"
-        unique_together = [("endpoint", "nombre", "creado_por")]
-        ordering = ["nombre"]
+        unique_together: ClassVar[list[tuple[str, ...]]] = [
+            ("endpoint", "nombre", "creado_por"),
+        ]
+        ordering: ClassVar[list[str]] = ["nombre"]
 
     def __str__(self) -> str:
         return self.nombre

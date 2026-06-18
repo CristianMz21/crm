@@ -8,12 +8,9 @@ concrete model.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self
+from typing import Self
 
 from django.db import models
-
-if TYPE_CHECKING:
-    from django.db.models.query import QuerySet
 
 
 class SoftDeleteQuerySet(models.QuerySet["models.Model"]):
@@ -28,7 +25,7 @@ class SoftDeleteQuerySet(models.QuerySet["models.Model"]):
         return self.filter(activo=False)
 
 
-class SoftDeleteManager(models.Manager.from_queryset(SoftDeleteQuerySet)):  # type: ignore[misc]
+class SoftDeleteManager(models.Manager["models.Model"]):
     """Default manager that hides archived records.
 
     Use ``Model.objects.activos()`` or ``Model.objects.archivados()``
@@ -36,5 +33,5 @@ class SoftDeleteManager(models.Manager.from_queryset(SoftDeleteQuerySet)):  # ty
     ``Manager``) returns everything including archived.
     """
 
-    def get_queryset(self) -> QuerySet[models.Model]:
-        return super().get_queryset().filter(activo=True)
+    def get_queryset(self) -> SoftDeleteQuerySet:
+        return SoftDeleteQuerySet(self.model, using=self._db).filter(activo=True)

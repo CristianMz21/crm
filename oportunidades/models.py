@@ -6,6 +6,8 @@ interaction log entry. Both inherit from core abstract models.
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from core.managers import SoftDeleteManager
 from core.models import AuditModel, SoftDeleteModel, TimeStampedModel
 from django.conf import settings
@@ -46,7 +48,7 @@ class Oportunidad(TimeStampedModel, SoftDeleteModel, AuditModel):
     class Meta:
         verbose_name = "oportunidad"
         verbose_name_plural = "oportunidades"
-        ordering = ["-fecha_creacion"]
+        ordering: ClassVar[list[str]] = ["-fecha_creacion"]
 
     def __str__(self) -> str:
         return self.titulo
@@ -60,7 +62,7 @@ class Actividad(TimeStampedModel, AuditModel):
     deleting an opportunity keeps the activity note.
     """
 
-    TIPO_CHOICES: list[tuple[str, str]] = [
+    TIPO_CHOICES: ClassVar[list[tuple[str, str]]] = [
         ("llamada", "Llamada"),
         ("email", "Email"),
         ("reunion", "Reunión"),
@@ -86,7 +88,7 @@ class Actividad(TimeStampedModel, AuditModel):
     class Meta:
         verbose_name = "actividad"
         verbose_name_plural = "actividades"
-        ordering = ["-fecha_creacion"]
+        ordering: ClassVar[list[str]] = ["-fecha_creacion"]
 
     def __str__(self) -> str:
         return f"{self.tipo}: {self.cliente.nombre}"
