@@ -1,9 +1,98 @@
 [project]
 name = "crm"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.13"
+description = "A real, productive CRM for solo salespeople and small teams. Built by hand on Django + DRF. AGPL-3.0."
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "AGPL-3.0" }
+authors = [
+    { name = "CristianMz21" }
+]
+keywords = ["crm", "django", "drf", "sales", "pipeline"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 6.0",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPL-3.0+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Database",
+]
 dependencies = [
-    "django>=6.0.6",
-    "djangorestframework>=3.17.1",
+    "Django>=6.0.6,<7.0",
+    "djangorestframework>=3.17.1,<4.0",
+    "django-filter>=24.3,<26.0",
+    "Faker>=25.0,<30.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0,<10.0",
+    "pytest-django>=4.8,<5.0",
+    "django-debug-toolbar>=4.4,<6.0",
+    "ruff>=0.7,<1.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["clientes", "pipeline", "audit", "dashboard", "config"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "DJ",   # flake8-django
+    "PT",   # flake8-pytest-style
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",    # line length handled by formatter
+    "B008",    # function call in default argument (Django patterns)
+    "DJ001",   # nullable FK (intentional for now)
+    "RUF012",  # mutable default in class attribute (Django Meta.ordering pattern)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"clientes/migrations/*.py" = ["E", "F", "I", "UP"]
+"**/tests/*.py" = ["B011"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "tests.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+testpaths = [
+    "clientes/tests",
+    "pipeline/tests",
+    "audit/tests",
+    "dashboard/tests",
+]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:debug_toolbar",
+    "ignore::DeprecationWarning:rest_framework",
 ]

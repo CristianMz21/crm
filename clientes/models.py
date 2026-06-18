@@ -7,13 +7,9 @@ class Cliente(models.Model):
     email = models.EmailField(unique=True, verbose_name="email")
     telefono = models.CharField(max_length=20, blank=True, verbose_name="teléfono")
     empresa = models.CharField(max_length=150, blank=True, verbose_name="empresa")
-    ciudad = models.CharField(
-        max_length=100, blank=True, db_index=True, verbose_name="ciudad"
-    )
+    ciudad = models.CharField(max_length=100, blank=True, db_index=True, verbose_name="ciudad")
     activo = models.BooleanField(default=True, verbose_name="activo")
-    fecha_creacion = models.DateTimeField(
-        auto_now_add=True, verbose_name="fecha de creación"
-    )
+    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creación")
 
     class Meta:
         verbose_name = "cliente"

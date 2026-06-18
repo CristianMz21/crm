@@ -11,7 +11,8 @@ cd crm
 
 ## 2. Python and virtualenv
 
-Python 3.11 or newer is required. The project is developed on 3.13.
+Python 3.12 or newer is required (Django 6.0+ dropped 3.11 support).
+The project is developed on 3.13.
 
 ```bash
 python -m venv .venv

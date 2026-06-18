@@ -28,7 +28,7 @@ MVP is user story 1 + 2 + 3 (P1).
 
 **Purpose**: Project initialization, dependencies, configuration.
 
-- [ ] T001 Pin runtime deps in `requirements.txt` (Django, DRF, django-filter, Faker, pytest, pytest-django, django-debug-toolbar, ruff)
+- [ ] T001 Pin runtime deps in `pyproject.toml` [project.dependencies] (Django, DRF, django-filter, Faker) and dev deps in [dependency-groups] (pytest, pytest-django, django-debug-toolbar, ruff). Spec originally said requirements.txt; amended to pyproject.toml because the project uses uv (uv.lock, .venv present).
 - [ ] T002 Add dev tooling in `pyproject.toml` (ruff config, pytest config with `DJANGO_SETTINGS_MODULE = "config.settings"`)
 - [ ] T003 [P] Create the `pipeline/` Django app skeleton: `apps.py`, `models.py` (empty), `migrations/`, `tests/`
 - [ ] T004 [P] Create the `audit/` Django app skeleton: `apps.py`, `models.py` (empty), `migrations/`, `tests/`
