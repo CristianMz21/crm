@@ -53,3 +53,31 @@ class AuditModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class BusquedaGuardada(models.Model):
+    """A named, saved filter on a list endpoint.
+
+    Stores the endpoint name and the filter params as JSON so
+    the user can re-run a search without re-entering all the
+    query parameters.
+    """
+
+    nombre = models.CharField(max_length=100, verbose_name="nombre")
+    endpoint = models.CharField(max_length=100, verbose_name="endpoint")
+    filtros = models.JSONField(default=dict, verbose_name="filtros")
+    creado_por = models.ForeignKey(
+        "auth.User",
+        on_delete=models.CASCADE,
+        related_name="busquedas_guardadas",
+        verbose_name="creado por",
+    )
+
+    class Meta:
+        verbose_name = "búsqueda guardada"
+        verbose_name_plural = "búsquedas guardadas"
+        unique_together = [("endpoint", "nombre", "creado_por")]
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
