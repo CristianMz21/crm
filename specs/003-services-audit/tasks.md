@@ -12,7 +12,7 @@
 Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo (orden=0), En proceso (orden=1), Ganado (orden=2, cerrada=True, es_ganado=True), Perdido (orden=3, cerrada=True). Idempotent.
 
 **Verify**: `shell -c "from oportunidades.services.pipeline import ensure_default_pipeline; p = ensure_default_pipeline(); print(p.nombre, p.etapas.count())"` → `(name) 4`
-- [ ] S020 done
+- [x] S0020 done
 
 ---
 
@@ -24,7 +24,7 @@ Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo 
 `mover_etapa(oportunidad, etapa_id, *, actor=None)`: sets etapa, sets/clears fecha_cierre based on `cerrada`, calls `save()`. Raises `ValueError` if etapa belongs to different pipeline.
 
 **Verify**: create oportunidad in Nuevo, move to Ganado, check `fecha_cierre is not None`
-- [ ] S021 done
+- [x] S0021 done
 
 ---
 
@@ -36,7 +36,7 @@ Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo 
 `log_action(*, actor, action, instance, changes)`: creates AuditLog with model=`instance.__class__._meta.label`, object_id=`instance.pk`, object_repr=`str(instance)`.
 
 **Verify**: `shell -c "from audit.services import log_action; print(callable(log_action))"` → `True`
-- [ ] S022 done
+- [x] S0022 done
 
 ---
 
@@ -48,7 +48,7 @@ Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo 
 `compute_diff(instance)`: re-fetches instance from DB, compares fields, returns `{field: {old, new}}` for changed fields. Excludes `fecha_creacion`, `fecha_modificacion`.
 
 **Verify**: `shell -c "from audit.services import compute_diff; print(callable(compute_diff))"` → `True`
-- [ ] S023 done
+- [x] S0023 done
 
 ---
 
@@ -60,7 +60,7 @@ Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo 
 `post_save` handlers for Cliente, Contacto, Etiqueta (in clientes) and Oportunidad, Actividad (in oportunidades). On `created=True`: log create. On `created=False`: compute_diff, if non-empty log update. Skip if `raw` or `instance._skip_audit`.
 
 **Verify**: create a Cliente, check `AuditLog.objects.filter(model="clientes.Cliente").count()` → 1
-- [ ] S024 done
+- [x] S0024 done
 
 ---
 
@@ -71,7 +71,7 @@ Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo 
 `post_delete` handlers for same 5 models. Log delete with `changes={"old": model_to_dict(instance)}`.
 
 **Verify**: hard-delete a Cliente via `objects_all`, check AuditLog has delete entry
-- [ ] S025 done
+- [x] S0025 done
 
 ---
 
@@ -82,7 +82,7 @@ Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo 
 `def ready(self): from . import signals  # noqa: F401`
 
 **Verify**: `python manage.py check` → no AppRegistryNotReady
-- [ ] S026 done
+- [x] S0026 done
 
 ---
 
@@ -94,7 +94,7 @@ Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo 
 `pre_save` on Pipeline: if `instance.es_default=True`, set `es_default=False` on all other pipelines.
 
 **Verify**: create 2 pipelines with es_default=True, check only 1 has it
-- [ ] S027 done
+- [x] S0027 done
 
 ---
 
@@ -106,7 +106,7 @@ Function that creates a default Pipeline (es_default=True) with 4 Etapas: Nuevo 
 Data migration calling `ensure_default_pipeline()` in `forwards()`. `reverse()` deletes the seeded pipeline.
 
 **Verify**: `migrate` + `shell -c "from pipeline.models import Pipeline; print(Pipeline.objects.filter(es_default=True).count())"` → 1
-- [ ] S028 done
+- [x] S0028 done
 
 ---
 
@@ -117,7 +117,7 @@ Data migration calling `ensure_default_pipeline()` in `forwards()`. `reverse()` 
 Register every concrete model. Use `list_display`, `list_filter`, `search_fields`. AuditLog is read-only.
 
 **Verify**: `python manage.py check` + visit `/admin/`
-- [ ] S029 done
+- [x] S0029 done
 
 ---
 
@@ -139,4 +139,4 @@ uv run ruff format --check .
 
 All pass → foundation complete. US1, US2, US3 can begin.
 
-- [ ] S030 foundation checkpoint passed ✅
+- [x] S0030 foundation checkpoint passed ✅

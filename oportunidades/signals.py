@@ -1,0 +1,67 @@
+"""Signal handlers for oportunidades app models.
+
+Writes AuditLog entries on create/update/delete of Oportunidad
+and Actividad.
+"""
+
+from audit.services import compute_diff, log_action
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
+
+from oportunidades.models import Actividad, Oportunidad
+
+_AUDITED_MODELS = [Oportunidad, Actividad]
+
+
+def _get_actor(instance):
+    """Extract the actor from the instance, if available."""
+    return getattr(instance, "_audit_actor", None)
+
+
+def _make_handler(model_class):
+    """Build post_save and post_delete handlers for a given model."""
+
+    @receiver(post_save, sender=model_class)
+    def _post_save(sender, instance, created, raw, **kwargs):
+        if raw or getattr(instance, "_skip_audit", False):
+            return
+        actor = _get_actor(instance)
+        if created:
+            from django.forms.models import model_to_dict
+
+            log_action(
+                actor=actor,
+                action="create",
+                instance=instance,
+                changes={"new": model_to_dict(instance)},
+            )
+        else:
+            diff = compute_diff(instance)
+            if diff:
+                log_action(
+                    actor=actor,
+                    action="update",
+                    instance=instance,
+                    changes=diff,
+                )
+
+    @receiver(post_delete, sender=model_class)
+    def _post_delete(sender, instance, **kwargs):
+        if getattr(instance, "_skip_audit", False):
+            return
+        from django.forms.models import model_to_dict
+
+        actor = _get_actor(instance)
+        log_action(
+            actor=actor,
+            action="delete",
+            instance=instance,
+            changes={"old": model_to_dict(instance)},
+        )
+
+    return _post_save, _post_delete
+
+
+# Register handlers for each audited model
+for _model in _AUDITED_MODELS:
+    _make_handler(_model)
