@@ -139,13 +139,21 @@ carpeta `docs/` a propósito** — los artefactos spec-kit son la
 | Artefacto | Para qué |
 |---|---|
 | [`.specify/memory/constitution.md`](./.specify/memory/constitution.md) | Los 8 principios no negociables. |
-| [`specs/001-crm-mvp/spec.md`](./specs/001-crm-mvp/spec.md) | Spec del MVP: 8 user stories, 15 FRs, 7 success criteria. |
-| [`specs/001-crm-mvp/data-model.md`](./specs/001-crm-mvp/data-model.md) | 9 entidades, campos, decisiones. |
-| [`specs/001-crm-mvp/plan.md`](./specs/001-crm-mvp/plan.md) | Stack, arquitectura, estructura de apps. |
-| [`specs/001-crm-mvp/research.md`](./specs/001-crm-mvp/research.md) | Por qué estas elecciones, qué se descartó. |
-| [`specs/001-crm-mvp/tasks.md`](./specs/001-crm-mvp/tasks.md) | 150 tareas por user story. |
-| [`specs/001-crm-mvp/quickstart.md`](./specs/001-crm-mvp/quickstart.md) | Cómo correr el sistema. |
-| [`specs/001-crm-mvp/contracts/api.yaml`](./specs/001-crm-mvp/contracts/api.yaml) | OpenAPI 3 del contrato HTTP. |
+| [`specs/000-architecture/overview.md`](./specs/000-architecture/overview.md) | Master roadmap: dependencias, orden de ejecución, links a todos los specs. |
+| [`specs/000-architecture/spec.md`](./specs/000-architecture/spec.md) | Spec completo del proyecto: 8 user stories, 15 FRs. |
+| [`specs/000-architecture/data-model.md`](./specs/000-architecture/data-model.md) | 9 entidades, campos, decisiones. Referencia para todos los specs. |
+| [`specs/000-architecture/plan.md`](./specs/000-architecture/plan.md) | Stack, arquitectura, estructura de apps. |
+| [`specs/000-architecture/research.md`](./specs/000-architecture/research.md) | Por qué estas elecciones, qué se descartó. |
+| [`specs/000-architecture/quickstart.md`](./specs/000-architecture/quickstart.md) | Cómo correr el sistema. |
+| [`specs/000-architecture/contracts/api.yaml`](./specs/000-architecture/contracts/api.yaml) | OpenAPI 3 del contrato HTTP completo. |
+| [`specs/000-architecture/adr-001-bounded-context-apps.md`](./specs/000-architecture/adr-001-bounded-context-apps.md) | ADR: por qué 6 apps. |
+| [`specs/001-core-foundation/`](./specs/001-core-foundation/) | S001-S005: abstract models + managers. |
+| [`specs/002-business-models/`](./specs/002-business-models/) | S010-S019: 7 modelos concretos + migraciones. |
+| [`specs/003-services-audit/`](./specs/003-services-audit/) | S020-S030: services, signals, admin, seed. |
+| [`specs/004-auth/`](./specs/004-auth/) | S031-S034: US1 Auth (login, logout, me). |
+| [`specs/005-clientes-api/`](./specs/005-clientes-api/) | S035-S044: US2 Clientes + Contactos API. |
+| [`specs/006-oportunidades-api/`](./specs/006-oportunidades-api/) | S045-S055: US3a Pipeline + Oportunidades API. |
+| [`specs/007-dashboard/`](./specs/007-dashboard/) | S056-S060: US3b Dashboard metrics. |
 
 **Regla de oro:** si cambia el comportamiento, cambia el spec.
 Spec desactualizado = bug latente.
@@ -154,23 +162,23 @@ Spec desactualizado = bug latente.
 
 ## Status
 
-**El proyecto está en construcción.** El spec y el plan están
-firmes; el código va por fases según
-[`specs/001-crm-mvp/tasks.md`](./specs/001-crm-mvp/tasks.md).
+**El proyecto está en construcción.** El spec está dividido en 7
+features incrementales. Cada uno tiene su propio `spec.md` y
+`tasks.md`. El orden de ejecución y las dependencias están en
+[`specs/000-architecture/overview.md`](./specs/000-architecture/overview.md).
 
-| # | Historia | Prioridad | Estado |
-|---|---|---|---|
-| US1 | Auth (login, logout, sesión) | P1 (MVP) | ⬜ |
-| US2 | Clientes + Contactos (CRUD, búsqueda, soft delete) | P1 (MVP) | 🔄 (modelos básicos) |
-| US3 | Pipeline + Oportunidades + Dashboard | P1 (MVP) | ⬜ |
-| US4 | Bitácora de actividades | P2 | ⬜ |
-| US5 | Audit log endpoint + filtros | P2 | ⬜ |
-| US6 | Export CSV streaming | P2 | ⬜ |
-| US7 | Saved searches | P3 | ⬜ |
-| US8 | Dashboard refinements | P3 | ⬜ |
+| # | Spec | Pasos | Depende de | Estado |
+|---|---|---|---|---|
+| 001 | [core-foundation](./specs/001-core-foundation/) | 5 | — | ⬜ |
+| 002 | [business-models](./specs/002-business-models/) | 10 | 001 | ⬜ |
+| 003 | [services-audit](./specs/003-services-audit/) | 11 | 002 | ⬜ |
+| 004 | [auth](./specs/004-auth/) | 4 | 003 | ⬜ |
+| 005 | [clientes-api](./specs/005-clientes-api/) | 10 | 003 | ⬜ |
+| 006 | [oportunidades-api](./specs/006-oportunidades-api/) | 11 | 005 | ⬜ |
+| 007 | [dashboard](./specs/007-dashboard/) | 5 | 006 | ⬜ |
 
-**MVP = US1 + US2 + US3.** Cuando esos tres estén verdes, el CRM
-ya es usable. Lo demás es valor incremental.
+**MVP = 001 → 007 (56 pasos totales).** Cada spec es independiente y
+tiene su propio checkpoint.
 
 **Lo que ya hay en el repo** (no código MVP todavía):
 - `clientes/models.py` con `Cliente` y `Contacto` en su forma
