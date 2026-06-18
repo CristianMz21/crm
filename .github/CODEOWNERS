@@ -1,0 +1,20 @@
+# CODEOWNERS
+# Cada línea es un patrón de archivo seguido del usuario o equipo
+# que se asigna como reviewer automático de los PRs que tocan esos archivos.
+# El último match gana.
+
+# Default: el maintainer del repo revisa todo
+*       @CristianMz21
+
+# El spec es crítico — el maintainer lo revisa
+/openspec/                          @CristianMz21
+
+# Cambios de CI y security
+/.github/workflows/                 @CristianMz21
+/.github/dependabot.yml             @CristianMz21
+/SECURITY.md                        @CristianMz21
+
+# Licencia y governance
+/LICENSE                            @CristianMz21
+/CONTRIBUTING.md                    @CristianMz21
+/CODE_OF_CONDUCT.md                 @CristianMz21
