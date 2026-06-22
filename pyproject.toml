@@ -35,7 +35,7 @@ dev = [
     "pytest>=8.0,<10.0",
     "pytest-django>=4.8,<5.0",
     "django-debug-toolbar>=4.4,<6.0",
-    "ruff>=0.7,<1.0",
+    "ruff>=0.15.18,<1.0",
 ]
 
 [tool.uv]
