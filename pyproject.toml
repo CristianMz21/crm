@@ -27,7 +27,7 @@ dependencies = [
     "Django>=6.0.6,<7.0",
     "djangorestframework>=3.17.1,<4.0",
     "django-filter>=24.3,<26.0",
-    "Faker>=25.0,<30.0",
+    "Faker>=40.23.0,<41.0",
 ]
 
 [dependency-groups]
